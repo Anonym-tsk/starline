@@ -23,14 +23,15 @@ class StarlineApi(BaseApi):
         for listener in self._update_listeners:
             listener()
 
-    # TODO: Возможно это надо теперь в ХА делать
     def add_update_listener(self, listener: Callable) -> None:
         """Add a listener for update notifications."""
         self._update_listeners.append(listener)
 
-    async def update(self, unused=None) -> None:
+    async def update(self, unused=None) -> bool:
         """Update StarLine data."""
         devices = await self.get_user_info()
+        if not devices:
+            return False
 
         for device_data in devices:
             device_id = str(device_data["device_id"])
@@ -39,6 +40,7 @@ class StarlineApi(BaseApi):
             self._devices[device_id].update(device_data)
 
         self._call_listeners()
+        return True
 
     @property
     def devices(self):
@@ -47,13 +49,13 @@ class StarlineApi(BaseApi):
 
     async def get_user_info(self) -> Optional[List[Dict[str, Any]]]:
         """Get user information."""
-
         # TODO: handle {'code': 500, 'codestring': 'Bad user id'}
-        url = "https://developer.starline.ru/json/v2/user/{}/user_info".format(
-            self._user_id
-        )
+
+        url = "https://developer.starline.ru/json/v2/user/{}/user_info".format(self._user_id)
         headers = {"Cookie": "slnet=" + self._slnet_token}
-        response = await self.get(url, headers=headers)
+        response = await self._get(url, headers=headers)
+        if response is None:
+            return None
 
         code = int(response["code"])
         if code == 200:
@@ -63,12 +65,12 @@ class StarlineApi(BaseApi):
     async def set_car_state(self, device_id: str, name: str, state: bool):
         """Set car state information."""
         _LOGGER.debug("Setting car %s state: %s=%d", device_id, name, state)
-        url = "https://developer.starline.ru/json/v1/device/{}/set_param".format(
-            device_id
-        )
+        url = "https://developer.starline.ru/json/v1/device/{}/set_param".format(device_id)
         data = {"type": name, name: 1 if state else 0}
         headers = {"Cookie": "slnet=" + self._slnet_token}
-        response = await self.post(url, json=data, headers=headers)
+        response = await self._post(url, json=data, headers=headers)
+        if response is None:
+            return None
 
         code = int(response["code"])
         if code == 200:

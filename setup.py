@@ -27,7 +27,7 @@ setup(
     name='starline',
 
     version=find_version('starline', '__init__.py'),
-    description='Python library for StarLine API',
+    description='Unofficial python library for StarLine API',
     long_description=long_description,
     url='https://github.com/Anonym-tsk/starline/',
     license='Apache License 2.0',
@@ -53,7 +53,7 @@ setup(
         'Programming Language :: Python :: 3 :: Only',
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: Apache License 2.0',
+        'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Software Development :: Libraries :: Application Frameworks',
