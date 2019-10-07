@@ -1,0 +1,20 @@
+"""StarLine constants."""
+import logging
+
+DEFAULT_CONNECT_TIMEOUT = 5
+DEFAULT_TOTAL_TIMEOUT = 120
+DEFAULT_ENCODING = 'utf-8'
+
+GET = 'GET'
+POST = 'POST'
+
+BATTERY_LEVEL_MIN = 11.8
+BATTERY_LEVEL_MAX = 13.0
+
+GSM_LEVEL_MIN = 1
+GSM_LEVEL_MAX = 30
+
+DEVICE_FUNCTION_POSITION = "position"
+DEVICE_FUNCTION_STATE = "state"
+
+LOGGER = logging.getLogger(__name__)
