@@ -1,7 +1,10 @@
 """Data StarLine API."""
+import logging
 from typing import Dict, List, Callable, Optional, Any
-from .base_api import BaseApi, LOGGER
+from .base_api import BaseApi
 from .device import StarlineDevice
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class StarlineApi(BaseApi):
@@ -20,6 +23,7 @@ class StarlineApi(BaseApi):
         for listener in self._update_listeners:
             listener()
 
+    # TODO: Возможно это надо теперь в ХА делать
     def add_update_listener(self, listener: Callable) -> None:
         """Add a listener for update notifications."""
         self._update_listeners.append(listener)
@@ -44,6 +48,7 @@ class StarlineApi(BaseApi):
     async def get_user_info(self) -> Optional[List[Dict[str, Any]]]:
         """Get user information."""
 
+        # TODO: handle {'code': 500, 'codestring': 'Bad user id'}
         url = "https://developer.starline.ru/json/v2/user/{}/user_info".format(
             self._user_id
         )
@@ -57,7 +62,7 @@ class StarlineApi(BaseApi):
 
     async def set_car_state(self, device_id: str, name: str, state: bool):
         """Set car state information."""
-        LOGGER.debug("Setting car %s state: %s=%d", device_id, name, state)
+        _LOGGER.debug("Setting car %s state: %s=%d", device_id, name, state)
         url = "https://developer.starline.ru/json/v1/device/{}/set_param".format(
             device_id
         )

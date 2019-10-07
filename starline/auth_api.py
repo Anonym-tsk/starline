@@ -1,6 +1,11 @@
 """Auth StarLine API."""
 import hashlib
-from .base_api import BaseApi, POST, LOGGER
+import logging
+import re
+from datetime import datetime
+from .base_api import BaseApi, POST
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class StarlineAuth(BaseApi):
@@ -18,7 +23,7 @@ class StarlineAuth(BaseApi):
 
         if int(response["state"]) == 1:
             app_code = response["desc"]["code"]
-            LOGGER.debug("Application code: {}".format(app_code))
+            _LOGGER.debug("Application code: {}".format(app_code))
             return app_code
         raise Exception(response)
 
@@ -34,7 +39,7 @@ class StarlineAuth(BaseApi):
 
         if int(response["state"]) == 1:
             app_token = response["desc"]["token"]
-            LOGGER.debug("Application token: {}".format(app_token))
+            _LOGGER.debug("Application token: {}".format(app_token))
             return app_token
         raise Exception(response)
 
@@ -72,15 +77,31 @@ class StarlineAuth(BaseApi):
             return state, response["desc"]
         raise Exception(response)
 
-    async def get_user_id(self, slid_token: str) -> (str, str):
+    async def get_user_id(self, slid_token: str) -> (str, float, str):
         """Authenticate user by StarLineID token."""
+        # TODO: check response code
+        # TODO: Продливать куку
 
         url = "https://developer.starline.ru/json/v2/auth.slid"
         data = {"slid_token": slid_token}
         response = await self._request(POST, url, json=data)
         json = await response.json(content_type=None)
 
-        # TODO: check response code
-        slnet_token = response.cookies["slnet"]
-        LOGGER.debug("SLnet token: {}".format(slnet_token))
-        return slnet_token, json["user_id"]
+        # Read cookie from headers because of bug https://gitlab.com/starline/openapi/issues/3
+        cookie_header = response.headers.get("Set-Cookie")
+        slnet = re.search("slnet=([^;]+);", cookie_header)
+        expires = re.search("expires=([^;]+);", cookie_header)
+        if slnet is None:
+            raise Exception(response)
+
+        slnet_token = slnet.group(1)
+        expires_time = None
+
+        if expires is not None:
+            try:
+                expires_time = datetime.strptime(expires.group(1), '%A, %d-%b-%y %H:%M:%S %Z').timestamp()
+            except:
+                pass
+
+        _LOGGER.debug("SLnet token: {}".format(slnet_token))
+        return slnet_token, expires_time, json["user_id"]

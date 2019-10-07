@@ -1,6 +1,9 @@
 """Base StarLine API."""
 import aiohttp
-from .const import DEFAULT_CONNECT_TIMEOUT, DEFAULT_TOTAL_TIMEOUT, DEFAULT_ENCODING, GET, POST, LOGGER
+import logging
+from .const import DEFAULT_CONNECT_TIMEOUT, DEFAULT_TOTAL_TIMEOUT, DEFAULT_ENCODING, GET, POST
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class BaseApi:
@@ -47,12 +50,12 @@ class BaseApi:
         response.raise_for_status()
         response.encoding = self._encoding
 
-        LOGGER.debug("StarlineApi {} request: {}".format(method, url))
-        LOGGER.debug("  Payload: {}".format(params))
-        LOGGER.debug("  Data: {}".format(data))
-        LOGGER.debug("  JSON: {}".format(json))
-        LOGGER.debug("  Headers: {}".format(headers))
-        LOGGER.debug("  Response: {}".format(response))
+        _LOGGER.debug("StarlineApi {} request: {}".format(method, url))
+        _LOGGER.debug("  Payload: {}".format(params))
+        _LOGGER.debug("  Data: {}".format(data))
+        _LOGGER.debug("  JSON: {}".format(json))
+        _LOGGER.debug("  Headers: {}".format(headers))
+        _LOGGER.debug("  Response: {}".format(response))
 
         # TODO: Handle Exceptions
         return response
@@ -62,7 +65,7 @@ class BaseApi:
 
         response = await self._request(GET, url, params=params, headers=headers)
         data = await response.json(content_type=None)
-        LOGGER.debug("  Data: {}".format(data))
+        _LOGGER.debug("  Data: {}".format(data))
         return data
 
     async def post(
@@ -79,5 +82,5 @@ class BaseApi:
             POST, url, params=params, data=data, json=json, headers=headers
         )
         data = await response.json(content_type=None)
-        LOGGER.debug("  Data: {}".format(data))
+        _LOGGER.debug("  Data: {}".format(data))
         return data

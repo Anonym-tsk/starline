@@ -75,9 +75,19 @@ class StarlineDevice:
         return self._device_id
 
     @property
+    def fw_version(self):
+        """Firmware version."""
+        return self._fw_version
+
+    @property
     def name(self):
         """Device name."""
         return self._alias
+
+    @property
+    def typename(self):
+        """Device type name."""
+        return self._typename
 
     @property
     def position(self):
