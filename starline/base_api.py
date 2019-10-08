@@ -12,7 +12,8 @@ class BaseApi:
 
     def __init__(self):
         """Constructor."""
-        self._session: aiohttp.ClientSession = aiohttp.ClientSession()
+        self._connector = aiohttp.TCPConnector(use_dns_cache=True, ttl_dns_cache=10, enable_cleanup_closed=True, force_close=True)
+        self._session: aiohttp.ClientSession = aiohttp.ClientSession(connector=self._connector)
         self._total_timeout: int = DEFAULT_TOTAL_TIMEOUT
         self._connect_timeout: int = DEFAULT_CONNECT_TIMEOUT
         self._encoding: str = DEFAULT_ENCODING
