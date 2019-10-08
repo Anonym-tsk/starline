@@ -16,6 +16,7 @@ class StarlineApi(BaseApi):
         self._user_id = user_id
         self._slnet_token = slnet_token
         self._devices: Dict[str, StarlineDevice] = {}
+        self._available: bool = False
         self._update_listeners: List[Callable] = []
 
     def _call_listeners(self) -> None:
@@ -27,25 +28,30 @@ class StarlineApi(BaseApi):
         """Add a listener for update notifications."""
         self._update_listeners.append(listener)
 
-    async def update(self, unused=None) -> bool:
+    async def update(self, unused=None) -> None:
         """Update StarLine data."""
         devices = await self.get_user_info()
         if not devices:
-            return False
-
-        for device_data in devices:
-            device_id = str(device_data["device_id"])
-            if device_id not in self._devices:
-                self._devices[device_id] = StarlineDevice()
-            self._devices[device_id].update(device_data)
+            self._available = False
+        else:
+            self._available = True
+            for device_data in devices:
+                device_id = str(device_data["device_id"])
+                if device_id not in self._devices:
+                    self._devices[device_id] = StarlineDevice()
+                self._devices[device_id].update(device_data)
 
         self._call_listeners()
-        return True
 
     @property
     def devices(self):
         """Devices list."""
         return self._devices
+
+    @property
+    def available(self):
+        """Is data available"""
+        return self._available
 
     async def get_user_info(self) -> Optional[List[Dict[str, Any]]]:
         """Get user information."""
