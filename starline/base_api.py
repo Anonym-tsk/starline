@@ -1,6 +1,8 @@
 """Base StarLine API."""
 import aiohttp
 import logging
+import re
+from datetime import datetime
 from typing import Optional
 from .const import DEFAULT_CONNECT_TIMEOUT, DEFAULT_TOTAL_TIMEOUT, DEFAULT_ENCODING, GET, POST
 
@@ -80,3 +82,36 @@ class BaseApi:
         data = await response.json(content_type=None)
         _LOGGER.debug("  Data: {}".format(data))
         return data
+
+    async def get_user_id(self, slid_token: str) -> (str, float, str):
+        """Authenticate user by StarLineID token."""
+
+        url = "https://developer.starline.ru/json/v2/auth.slid"
+        data = {"slid_token": slid_token}
+        response = await self._request(POST, url, json=data)
+        if response is None:
+            raise Exception("Failed to get SLNet token")
+
+        json = await response.json(content_type=None)
+        if int(json["code"]) != 200:
+            raise Exception(json["codestring"])
+
+        # Read cookie from headers because of bug https://gitlab.com/starline/openapi/issues/3
+        cookie_header = response.headers.get("Set-Cookie")
+        slnet = re.search("slnet=([^;]+);", cookie_header)
+        expires = re.search("expires=([^;]+);", cookie_header)
+
+        if slnet is None:
+            raise Exception("Failed to get SLNet token")
+
+        slnet_token = slnet.group(1)
+        expires_time = datetime.now().timestamp() + (4 * 60 * 60)  # Now + 4h
+
+        if expires is not None:
+            try:
+                expires_time = datetime.strptime(expires.group(1), '%A, %d-%b-%y %H:%M:%S %Z').timestamp()
+            except:
+                pass
+
+        _LOGGER.debug("SLNet token: {}".format(slnet_token))
+        return slnet_token, expires_time, json["user_id"]
