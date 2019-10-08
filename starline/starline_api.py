@@ -13,8 +13,8 @@ class StarlineApi(BaseApi):
     def __init__(self, user_id: str, slnet_token: str):
         """Constructor."""
         super().__init__()
-        self._user_id = user_id
-        self._slnet_token = slnet_token
+        self._user_id: str = user_id
+        self._slnet_token: str = slnet_token
         self._devices: Dict[str, StarlineDevice] = {}
         self._available: bool = False
         self._update_listeners: List[Callable] = []
@@ -44,19 +44,17 @@ class StarlineApi(BaseApi):
         self._call_listeners()
 
     @property
-    def devices(self):
+    def devices(self) -> Dict[str, StarlineDevice]:
         """Devices list."""
         return self._devices
 
     @property
-    def available(self):
+    def available(self) -> bool:
         """Is data available"""
         return self._available
 
     async def get_user_info(self) -> Optional[List[Dict[str, Any]]]:
         """Get user information."""
-        # TODO: handle {'code': 500, 'codestring': 'Bad user id'}
-
         url = "https://developer.starline.ru/json/v2/user/{}/user_info".format(self._user_id)
         headers = {"Cookie": "slnet=" + self._slnet_token}
         response = await self._get(url, headers=headers)
@@ -84,3 +82,11 @@ class StarlineApi(BaseApi):
             self._call_listeners()
             return response
         return None
+
+    def set_user_id(self, user_id: str) -> None:
+        """Update user ID."""
+        self._user_id = user_id
+
+    def set_slnet_token(self, slnet_token: str) -> None:
+        """Update SLNet token."""
+        self._slnet_token = slnet_token

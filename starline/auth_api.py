@@ -75,7 +75,6 @@ class StarlineAuth(BaseApi):
 
     async def get_user_id(self, slid_token: str) -> (str, float, str):
         """Authenticate user by StarLineID token."""
-        # TODO: Как-то продливать куку
 
         url = "https://developer.starline.ru/json/v2/auth.slid"
         data = {"slid_token": slid_token}
@@ -96,7 +95,7 @@ class StarlineAuth(BaseApi):
             raise Exception("Failed to get SLNet token")
 
         slnet_token = slnet.group(1)
-        expires_time = None
+        expires_time = datetime.now().timestamp() + (4 * 60 * 60)  # Now + 4h
 
         if expires is not None:
             try:
