@@ -28,7 +28,7 @@ class StarlineApi(BaseApi):
         """Add a listener for update notifications."""
         self._update_listeners.append(listener)
 
-    async def update(self, unused=None) -> None:
+    async def update(self) -> None:
         """Update StarLine data."""
         devices = await self.get_user_info()
         if not devices:
