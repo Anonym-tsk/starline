@@ -9,7 +9,7 @@ _LOGGER = logging.getLogger(__name__)
 class StarlineAuth(BaseApi):
     """Auth StarLine API class."""
 
-    async def get_app_code(self, app_id: str, app_secret: str) -> str:
+    def get_app_code(self, app_id: str, app_secret: str) -> str:
         """Get application code for getting application token."""
 
         url = "https://id.starline.ru/apiV3/application/getCode/"
@@ -17,7 +17,7 @@ class StarlineAuth(BaseApi):
             "appId": app_id,
             "secret": hashlib.md5(app_secret.encode(self._encoding)).hexdigest(),
         }
-        response = await self._get(url, params=payload)
+        response = self._get(url, params=payload)
         if response is None:
             raise Exception("Failed to get application code")
 
@@ -28,7 +28,7 @@ class StarlineAuth(BaseApi):
 
         raise Exception("Invalid response state: {}", response["state"])
 
-    async def get_app_token(self, app_id: str, app_secret: str, app_code: str) -> str:
+    def get_app_token(self, app_id: str, app_secret: str, app_code: str) -> str:
         """Get application token for authentication."""
 
         url = "https://id.starline.ru/apiV3/application/getToken/"
@@ -36,7 +36,7 @@ class StarlineAuth(BaseApi):
             "appId": app_id,
             "secret": hashlib.md5((app_secret + app_code).encode(self._encoding)).hexdigest(),
         }
-        response = await self._get(url, params=payload)
+        response = self._get(url, params=payload)
         if response is None:
             raise Exception("Failed to get application token")
 
@@ -47,7 +47,7 @@ class StarlineAuth(BaseApi):
 
         raise Exception("Invalid response state: {}", response["state"])
 
-    async def get_slid_user_token(self, app_token: str, user_login: str, user_password: str, sms_code: str = None, captcha_sid: str = None, captcha_code: str = None) -> (bool, dict):
+    def get_slid_user_token(self, app_token: str, user_login: str, user_password: str, sms_code: str = None, captcha_sid: str = None, captcha_code: str = None) -> (bool, dict):
         """Authenticate user by login, password and application token."""
 
         url = "https://id.starline.ru/apiV3/user/login/"
@@ -61,7 +61,7 @@ class StarlineAuth(BaseApi):
         if (captcha_sid is not None) and (captcha_code is not None):
             data["captchaSid"] = captcha_sid
             data["captchaCode"] = captcha_code
-        response = await self._post(url, params=payload, data=data)
+        response = self._post(url, params=payload, data=data)
         if response is None:
             raise Exception("Failed to get user token")
 

@@ -28,9 +28,9 @@ class StarlineApi(BaseApi):
         """Add a listener for update notifications."""
         self._update_listeners.append(listener)
 
-    async def update(self) -> None:
+    def update(self) -> None:
         """Update StarLine data."""
-        devices = await self.get_user_info()
+        devices = self.get_user_info()
         if not devices:
             self._available = False
         else:
@@ -53,11 +53,11 @@ class StarlineApi(BaseApi):
         """Is data available"""
         return self._available
 
-    async def get_user_info(self) -> Optional[List[Dict[str, Any]]]:
+    def get_user_info(self) -> Optional[List[Dict[str, Any]]]:
         """Get user information."""
         url = "https://developer.starline.ru/json/v2/user/{}/user_info".format(self._user_id)
         headers = {"Cookie": "slnet=" + self._slnet_token}
-        response = await self._get(url, headers=headers)
+        response = self._get(url, headers=headers)
         if response is None:
             return None
 
@@ -66,13 +66,13 @@ class StarlineApi(BaseApi):
             return response["devices"] + response["shared_devices"]
         return None
 
-    async def set_car_state(self, device_id: str, name: str, state: bool):
+    def set_car_state(self, device_id: str, name: str, state: bool):
         """Set car state information."""
         _LOGGER.debug("Setting car %s state: %s=%d", device_id, name, state)
         url = "https://developer.starline.ru/json/v1/device/{}/set_param".format(device_id)
         data = {"type": name, name: 1 if state else 0}
         headers = {"Cookie": "slnet=" + self._slnet_token}
-        response = await self._post(url, json=data, headers=headers)
+        response = self._post(url, json=data, headers=headers)
         if response is None:
             return None
 
