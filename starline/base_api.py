@@ -96,7 +96,8 @@ class BaseApi:
         for cookie in response.cookies:
             if cookie.name == 'slnet':
                 slnet_token = cookie.value
-                expires_time = cookie.expires
+                if cookie.expires:
+                    expires_time = cookie.expires
 
         if slnet_token is None:
             raise Exception("Failed to get SLNet token")
