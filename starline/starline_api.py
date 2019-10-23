@@ -24,9 +24,13 @@ class StarlineApi(BaseApi):
         for listener in self._update_listeners:
             listener()
 
-    def add_update_listener(self, listener: Callable) -> None:
+    def add_update_listener(self, listener: Callable) -> Callable:
         """Add a listener for update notifications."""
+        def dispose_():
+            self._update_listeners.remove(listener)
+
         self._update_listeners.append(listener)
+        return dispose_
 
     def update(self) -> None:
         """Update StarLine data."""
