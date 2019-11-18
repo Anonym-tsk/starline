@@ -35,23 +35,23 @@ class StarlineDevice:
 
     def update(self, device_data):
         """Update data from server."""
-        self._device_id = str(device_data["device_id"])
-        self._imei = device_data["imei"]
-        self._alias = device_data["alias"]
-        self._battery = device_data["battery"]
-        self._ctemp = device_data["ctemp"]
-        self._etemp = device_data["etemp"]
-        self._fw_version = device_data["fw_version"]
-        self._gsm_lvl = device_data["gsm_lvl"]
-        self._phone = device_data["phone"]
-        self._status = device_data["status"]
-        self._ts_activity = device_data["ts_activity"]
-        self._typename = device_data["typename"]
-        self._balance = device_data["balance"]
-        self._car_state = device_data["car_state"]
-        self._car_alr_state = device_data["car_alr_state"]
-        self._functions = device_data["functions"]
-        self._position = device_data["position"]
+        self._device_id = str(device_data.get("device_id"))
+        self._imei = device_data.get("imei")
+        self._alias = device_data.get("alias")
+        self._battery = device_data.get("battery")
+        self._ctemp = device_data.get("ctemp", device_data.get("mayak_temp"))
+        self._etemp = device_data.get("etemp")
+        self._fw_version = device_data.get("fw_version")
+        self._gsm_lvl = device_data.get("gsm_lvl")
+        self._phone = device_data.get("phone")
+        self._status = device_data.get("status")
+        self._ts_activity = device_data.get("ts_activity")
+        self._typename = device_data.get("typename")
+        self._balance = device_data.get("balance", {})
+        self._car_state = device_data.get("car_state", {})
+        self._car_alr_state = device_data.get("car_alr_state", {})
+        self._functions = device_data.get("functions", [])
+        self._position = device_data.get("position")
 
     def update_car_state(self, car_state):
         """Update car state from server."""
@@ -62,12 +62,12 @@ class StarlineDevice:
     @property
     def support_position(self):
         """Is position supported by this device."""
-        return DEVICE_FUNCTION_POSITION in self._functions
+        return DEVICE_FUNCTION_POSITION in self._functions and self._position
 
     @property
     def support_state(self):
         """Is state supported by this device."""
-        return DEVICE_FUNCTION_STATE in self._functions
+        return DEVICE_FUNCTION_STATE in self._functions and self._car_state
 
     @property
     def device_id(self):
@@ -107,6 +107,8 @@ class StarlineDevice:
     @property
     def battery_level_percent(self):
         """Car battery level percent."""
+        if self._battery is None:
+            return 0
         if self._battery > BATTERY_LEVEL_MAX:
             return 100
         if self._battery < BATTERY_LEVEL_MIN:
@@ -120,7 +122,7 @@ class StarlineDevice:
     @property
     def balance(self):
         """Device balance."""
-        return self._balance["active"]
+        return self._balance.get("active", {})
 
     @property
     def car_state(self):
@@ -145,11 +147,17 @@ class StarlineDevice:
     @property
     def gsm_level(self):
         """GSM signal level."""
-        return self._gsm_lvl if self.online else 0
+        if self._gsm_lvl is None:
+            return None
+        if not self.online:
+            return 0
+        return self._gsm_lvl
 
     @property
     def gsm_level_percent(self):
         """GSM signal level percent."""
+        if self.gsm_level is None:
+            return None
         if self.gsm_level > GSM_LEVEL_MAX:
             return 100
         if self.gsm_level < GSM_LEVEL_MIN:
