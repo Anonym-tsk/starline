@@ -65,7 +65,7 @@ class StarlineApi(BaseApi):
 
             data = response["obd_params"]
             if data["errors"] and data["errors"]["val"] > 0:
-                data["errors"]["errors"] = self.get_odb_errors(device_id)
+                data["errors"]["errors"] = self.get_obd_errors(device_id)
 
             self._devices[device_id].update_obd(data)
 
@@ -92,7 +92,7 @@ class StarlineApi(BaseApi):
             return response["devices"] + response["shared_devices"]
         return None
 
-    def get_odb_errors(self, device_id: str) -> Optional[List[Dict[str, Any]]]:
+    def get_obd_errors(self, device_id: str) -> Optional[List[Dict[str, Any]]]:
         """Get obd device errors."""
         url = "https://developer.starline.ru/json/v1/device/{}/obd_errors".format(device_id)
         headers = {"Cookie": "slnet=" + self._slnet_token}
