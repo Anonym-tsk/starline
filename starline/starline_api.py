@@ -64,7 +64,7 @@ class StarlineApi(BaseApi):
                 continue
 
             data = response["obd_params"]
-            if data["errors"] and data["errors"]["val"] > 0:
+            if "errors" in data and data["errors"] and data["errors"]["val"] > 0:
                 data["errors"]["errors"] = self.get_obd_errors(device_id)
 
             self._devices[device_id].update_obd(data)
